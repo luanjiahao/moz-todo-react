@@ -1,11 +1,37 @@
 import React from "react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
 
 
 export default function Todo(props) {
 
   const [newName, setNewName] = useState("");
   const [isEditing, setEditing] = useState(false);
+
+  function usePrevious(value) {
+    const ref = useRef();
+    useEffect(() => {
+      ref.current = value;
+    });
+    return ref.current;
+  }
+
+  const wasEditing = usePrevious(isEditing);
+
+  
+  const editFieldRef = useRef(null);
+  const editButtonRef = useRef(null);
+
+  useEffect(() => {
+    if (!wasEditing && isEditing) {
+      editFieldRef.current.focus();
+    } else if (wasEditing && !isEditing) {
+      editButtonRef.current.focus();
+    }
+  }, [wasEditing, isEditing]);
+  
+  
+  
 
   function handleChange(e) {
     setNewName(e.target.value);
@@ -17,7 +43,7 @@ export default function Todo(props) {
     setNewName("");
     setEditing(false);
   }
-  
+
 
 
   const editingTemplate = (
@@ -32,6 +58,7 @@ export default function Todo(props) {
           type="text"
           value={newName}
           onChange={handleChange}
+          ref={editFieldRef}
         />
       </div>
       <div className="btn-group">
@@ -64,6 +91,7 @@ export default function Todo(props) {
           type="button"
           className="btn"
           onClick={() => setEditing(true)}
+          ref={editButtonRef}
         >
           Edit <span className="visually-hidden">{props.name}</span>
         </button>
