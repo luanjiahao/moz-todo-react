@@ -1,3 +1,4 @@
+使用react框架完成的一个简易的任务清单网页
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
