@@ -11,6 +11,15 @@ function App(props) {
   const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState("All");
   const listHeadingRef = useRef(null);
+  let [editCount, setEditCount] = useState(0);
+
+  useEffect(() => {
+    fetch("http://localhost:8080/Todo/all").then((res) => {
+      return res.json()
+    }).then((value) => {
+      setTasks(value)
+    })
+  }, [editCount])
 
   function usePrevious(value) {
     const ref = useRef();
@@ -19,7 +28,7 @@ function App(props) {
     });
     return ref.current;
   }
-  
+
   const prevTaskLength = usePrevious(tasks.length);
 
   useEffect(() => {
@@ -27,7 +36,7 @@ function App(props) {
       listHeadingRef.current.focus();
     }
   }, [tasks.length, prevTaskLength]);
-  
+
 
   const FILTER_MAP = {
     All: () => true,
@@ -62,40 +71,33 @@ function App(props) {
     ));
 
   function toggleTaskCompleted(id) {
-    const updatedTasks = tasks.map((task) => {
-      // if this task has the same ID as the edited task
-      if (id === task.id) {
-        // use object spread to make a new object
-        // whose `completed` prop has been inverted
-        return { ...task, completed: !task.completed };
-      }
-      return task;
-    });
-    setTasks(updatedTasks);
+    const updateTask=tasks.filter((task)=>task.id==id)[0];
+    fetch("http://localhost:8080/Todo/complete?id=" + id + "&complete=" +  !updateTask.completed, { method: "post" }).then((res) => {
+      console.log(res.text());
+      setEditCount(++editCount);
+    })
   }
 
 
   function addTask(name) {
-    const newTask = { id: `todo-${nanoid()}`, name, completed: false };
-    setTasks([...tasks, newTask]);
+    fetch("http://localhost:8080/Todo/add?name=" + name + "&isCompleted=false", { method: "post" }).then((res) => {
+      console.log(res.text());
+      setEditCount(++editCount);
+    })
   }
 
   function deleteTask(id) {
-    const remainingTasks = tasks.filter((task) => id !== task.id);
-    setTasks(remainingTasks);
+    fetch("http://localhost:8080/Todo/delete?id=" + id, { method: "post" }).then((res) => {
+      console.log(res.text());
+      setEditCount(++editCount);
+    })
   }
 
   function editTask(id, newName) {
-    const editedTaskList = tasks.map((task) => {
-      // if this task has the same ID as the edited task
-      if (id === task.id) {
-        // Copy the task and update its name
-        return { ...task, name: newName };
-      }
-      // Return the original task if it's not the edited task
-      return task;
-    });
-    setTasks(editedTaskList);
+    fetch("http://localhost:8080/Todo/update?id=" + id + "&name=" + newName , { method: "post" }).then((res) => {
+      console.log(res.text());
+      setEditCount(++editCount);
+    })
   }
 
 
